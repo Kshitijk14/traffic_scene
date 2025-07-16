@@ -7,8 +7,8 @@ import supervision as sv
 
 # configurations
 LOG_PATH = Path(CONFIG["LOG_DIR"])
-MODEL_WEIGHTS = Path(CONFIG["MODELS_WEIGHTS_8N"])
-MODEL_CONFIG = Path(CONFIG["MODELS_CONFIG_8N"])
+MODEL_WEIGHTS = Path(CONFIG["MODELS_WEIGHTS_8X"])
+MODEL_CONFIG = Path(CONFIG["MODELS_CONFIG_8X"])
 
 # setup logging
 LOG_DIR = os.path.join(os.getcwd(), LOG_PATH)
