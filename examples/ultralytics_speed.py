@@ -1,10 +1,8 @@
 import argparse
 from collections import defaultdict, deque
-
 import cv2
 import numpy as np
 from ultralytics import YOLO
-
 import supervision as sv
 
 SOURCE = np.array([[1252, 787], [2298, 803], [5039, 2159], [-550, 2159]])

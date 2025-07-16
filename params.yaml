@@ -3,7 +3,7 @@ LOG_DIR: "logs"
 SOURCE_DIR: "data/india/"
 SOURCE_VIDEO_PATH: "data/india/08_30fps.mp4"
 RESULT_DIR: "results/india/"
-TARGET_VIDEO_PATH: "results/india/result_02-08_30fps.mp4"
+TARGET_VIDEO_PATH: "results/india/result_06-08_30fps.mp4"
 
 MODELS_DIR: "models/"
 MODELS_WEIGHTS_8X: "models/yolov8x.pt"
