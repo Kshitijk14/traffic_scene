@@ -182,19 +182,21 @@ if __name__ == "__main__":
 
     parser.add_argument(
         "--source_weights_path",
-        required=True,
+        # required=True,
+        default="models/yolov8x.pt", # YOLO("yolov8x.pt")
         help="Path to the source weights file",
         type=str,
     )
     parser.add_argument(
         "--source_video_path",
-        required=True,
+        # required=True,
+        default="data/raw/vehicle-counting.mp4",
         help="Path to the source video file",
         type=str,
     )
     parser.add_argument(
         "--target_video_path",
-        default=None,
+        default="results/zone_vehicle-counting.mp4",
         help="Path to the target video file (output)",
         type=str,
     )
@@ -205,7 +207,10 @@ if __name__ == "__main__":
         type=float,
     )
     parser.add_argument(
-        "--iou_threshold", default=0.7, help="IOU threshold for the model", type=float
+        "--iou_threshold", 
+        default=0.7, 
+        help="IOU threshold for the model", 
+        type=float
     )
 
     args = parser.parse_args()

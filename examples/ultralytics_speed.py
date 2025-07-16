@@ -43,13 +43,15 @@ def parse_arguments() -> argparse.Namespace:
     )
     parser.add_argument(
         "--source_video_path",
-        required=True,
+        # required=True,
+        default="data/raw/vehicle-counting.mp4",
         help="Path to the source video file",
         type=str,
     )
     parser.add_argument(
         "--target_video_path",
-        required=True,
+        # required=True,
+        default="results/speed_vehicle-counting.mp4",
         help="Path to the target video file (output)",
         type=str,
     )
@@ -60,7 +62,10 @@ def parse_arguments() -> argparse.Namespace:
         type=float,
     )
     parser.add_argument(
-        "--iou_threshold", default=0.7, help="IOU threshold for the model", type=float
+        "--iou_threshold", 
+        default=0.7, 
+        help="IOU threshold for the model", 
+        type=float
     )
 
     return parser.parse_args()
@@ -70,7 +75,7 @@ if __name__ == "__main__":
     args = parse_arguments()
 
     video_info = sv.VideoInfo.from_video_path(video_path=args.source_video_path)
-    model = YOLO("yolo11x.pt")
+    model = YOLO("models/yolov8x.pt")
 
     byte_track = sv.ByteTrack(
         frame_rate=video_info.fps, track_activation_threshold=args.confidence_threshold
