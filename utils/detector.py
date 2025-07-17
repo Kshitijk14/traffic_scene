@@ -1,4 +1,3 @@
-import os
 from pathlib import Path
 from utils.config import CONFIG
 from ultralytics import YOLO

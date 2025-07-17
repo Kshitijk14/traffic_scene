@@ -4,8 +4,9 @@ from utils.config import CONFIG
 from utils.logger import setup_logger
 from utils.common import ensure_directory_exists
 from utils.save_track_checkpoints import save_object_log_csv
-from pipeline.detector import VehicleDetector
-from pipeline.tracker import Tracker
+from utils.zones import define_zones, draw_zones
+from utils.detector import VehicleDetector
+from utils.tracker import Tracker
 from tqdm import tqdm
 import traceback
 from datetime import datetime, timedelta
@@ -58,24 +59,6 @@ def estimate_speed(trail, fps, logger):
         logger.error(f"[] Error estimating speed: {e}")
         logger.debug(traceback.format_exc())
         return 
-
-# def estimate_direction(dir_trail, logger):
-#     try:
-#         logger.debug(f"[] Estimating direction for trail: {dir_trail}")
-        
-#         dx = dir_trail[-1][0] - dir_trail[0][0]
-#         dy = dir_trail[-1][1] - dir_trail[0][1]
-        
-#         horiz = "RIGHT" if dx > 5 else "LEFT" if dx < -5 else ""
-#         vert = "DOWN" if dy > 5 else "UP" if dy < -5 else ""
-
-#         if horiz and vert:
-#             return f"{horiz}-{vert}"
-#         return horiz or vert or "STILL"
-#     except Exception as e:
-#         logger.error(f"[] Error estimating direction: {e}")
-#         logger.debug(traceback.format_exc())
-#         return "UNKNOWN"
 
 def estimate_cardinal_direction(dir_trail, logger, threshold=10):
     try:
@@ -179,7 +162,6 @@ def annotate_detections(frame, frame_idx, detections, trail_coords, direction_co
                 label = f"#{track_id}"
             else:
                 speed_kmph = estimate_speed(trail, fps, logger)
-                # direction = estimate_direction(dir_trail, logger)
                 direction = estimate_cardinal_direction(dir_trail, logger)
                 label = f"#{track_id} {speed_kmph} km/h {direction}"
                 draw_direction_arrow(annotated_frame, dir_trail, direction, logger)
@@ -241,13 +223,15 @@ def run_stage_01(video_path=SOURCE_VIDEO_PATH, output_path=TARGET_VIDEO_PATH):
         trail_coords = defaultdict(deque)
         direction_coords = defaultdict(deque)
 
-        CSV_OUT_FILE = os.path.join(TRACK_CHECKPOINTS_PATH, (f"04-object_log_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"))
+        CSV_OUT_FILE = os.path.join(TRACK_CHECKPOINTS_PATH, (f"05-object_log_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"))
         object_logs = dict()
         active_track_ids = set()
 
         frame_idx = 0
         logger.info(f"Processing video: {video_path}, Output: {output_path}")
         logger.info(f"Video properties - Width: {width}, Height: {height}, FPS: {fps}, Frame Count: {frame_count}")
+        
+        zones = define_zones(width, height)
         
         with tqdm(total=frame_count, desc="Processing Video", unit="frame") as pbar:
             while cap.isOpened():
@@ -297,6 +281,8 @@ def run_stage_01(video_path=SOURCE_VIDEO_PATH, output_path=TARGET_VIDEO_PATH):
                     frame, frame_idx, tracked_detections, trail_coords, direction_coords, object_logs, fps, logger
                 )
                 logger.debug(f"Frame {frame_idx}: Annotated frame with {len(tracked_detections.xyxy)} detections.")
+                
+                annotated_frame = draw_zones(annotated_frame, zones)
 
                 out.write(annotated_frame)
                 frame_idx += 1

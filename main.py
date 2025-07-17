@@ -2,7 +2,7 @@ import os, argparse, traceback
 from pathlib import Path
 from utils.logger import setup_logger
 from utils.config import CONFIG
-from pipeline.stage_01_detect_n_track import run_stage_01
+from visual_pipeline.stage_01_detect_n_track import run_stage_01
 
 
 # configurations

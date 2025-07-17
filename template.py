@@ -8,27 +8,33 @@ logging.basicConfig(level=logging.INFO, format='[%(asctime)s]: %(message)s:')
 project_name = "vehicle-tracking-n-detection"
 
 list_of_files = [
-    # "data/raw/.gitkeep",
-    # "results/.gitkeep",
+    "data/raw/.gitkeep",
+    "results/outputs/.gitkeep",
+    "results/csv/.gitkeep",
+    
     "models/.gitkeep",
     "notebooks/trials.ipynb",
     
-    "pipeline/__init__.py",
-    "pipeline/stage_01.py",
-    "pipeline/stage_02.py",
+    "visual_pipeline/__init__.py",
+    "visual_pipeline/stage_01.py",
+    "visual_pipeline/stage_02.py",
+    
+    "training_pipeline/__init__.py",
+    "training_pipeline/stage_01.py",
     
     "utils/__init__.py",
     "utils/logger.py",
     "utils/config.py",
+    "utils/common.py",
     
     "main.py",
     "test.py",
     
     "params.yaml",
     "DVC.yaml",
-    # ".env.local",
+    ".env.local",
     ".env.example",
-    # "requirements.txt",
+    "requirements.txt",
 ]
 
 
