@@ -1,17 +1,17 @@
-import cv2, os, math
+import cv2, os, traceback
 from pathlib import Path
+from tqdm import tqdm
 from utils.config import CONFIG
 from utils.logger import setup_logger
-from utils.common import ensure_directory_exists
-from utils.save_track_checkpoints import save_object_log_csv
-from utils.zones import define_zones, draw_zones
-from utils.detector import VehicleDetector
-from utils.tracker import Tracker
-from tqdm import tqdm
-import traceback
+import supervision as sv
 from datetime import datetime, timedelta
 from collections import defaultdict, deque
-import supervision as sv
+from utils.detector import VehicleDetector, draw_box_and_label
+from utils.tracker import Tracker, draw_trace_path
+from utils.estimator import estimate_speed, estimate_cardinal_direction, draw_direction_arrow
+from utils.zones import define_zones, draw_zones
+from utils.common import ensure_directory_exists
+from utils.save_track_checkpoints import save_object_log_csv
 
 
 # configurations
@@ -34,115 +34,6 @@ CLASS_COLOR_MAP = {
     7: (0, 0, 255),     # truck -> Red
 }
 
-DIRECTION_COLOR_MAP = {
-    "N": (255, 0, 0),       # Red
-    "NE": (255, 165, 0),    # Orange
-    "E": (0, 255, 0),       # Green
-    "SE": (0, 255, 255),    # Cyan
-    "S": (0, 0, 255),       # Blue
-    "SW": (128, 0, 128),    # Purple
-    "W": (255, 255, 0),     # Yellow
-    "NW": (255, 0, 255),    # Magenta
-    "STILL": (192, 192, 192)  # Gray
-}
-
-
-def estimate_speed(trail, fps, logger):
-    try:
-        logger.debug(f"[] Estimating speed for trail: {trail}")
-        
-        y_start, y_end = trail[0][1], trail[-1][1]
-        distance = abs(y_end - y_start)
-        time_sec = len(trail) / fps
-        return int((distance / time_sec) * 3.6)
-    except Exception as e:
-        logger.error(f"[] Error estimating speed: {e}")
-        logger.debug(traceback.format_exc())
-        return 
-
-def estimate_cardinal_direction(dir_trail, logger, threshold=10):
-    try:
-        if len(dir_trail) < 2:
-            logger.debug("[] Direction estimation: Not enough points.")
-            return "UNKNOWN"
-
-        start_point = dir_trail[0]
-        end_point = dir_trail[-1]        
-        dx = end_point[0] - start_point[0]
-        dy = end_point[1] - start_point[1]
-        
-        logger.debug(f"[] Direction estimation: dx={dx}, dy={dy}")
-
-        if abs(dx) < threshold and abs(dy) < threshold:
-            return "STILL"
-
-        angle_rad = math.atan2(-dy, dx)  # y-axis is inverted in image space
-        angle_deg = math.degrees(angle_rad)
-        angle_deg = (angle_deg + 360) % 360  # Normalize to [0, 360)
-        
-        logger.debug(f"[] Direction estimation: angle = {angle_deg:.2f}°")
-
-        if 22.5 <= angle_deg < 67.5:
-            return "NE"
-        elif 67.5 <= angle_deg < 112.5:
-            return "N"
-        elif 112.5 <= angle_deg < 157.5:
-            return "NW"
-        elif 157.5 <= angle_deg < 202.5:
-            return "W"
-        elif 202.5 <= angle_deg < 247.5:
-            return "SW"
-        elif 247.5 <= angle_deg < 292.5:
-            return "S"
-        elif 292.5 <= angle_deg < 337.5:
-            return "SE"
-        else:
-            return "E"
-    except Exception as e:
-        logger.error(f"[] Error estimating cardinal direction: {e}")
-        logger.debug(traceback.format_exc())
-        return "UNKNOWN"
-
-def draw_box_and_label(frame, box, label, color, logger):
-    try:
-        logger.debug(f"[] Drawing box: {box}, label: {label}, color: {color}")
-        x1, y1, x2, y2 = box
-        cv2.rectangle(frame, (x1, y1), (x2, y2), color, 3)
-        cv2.putText(
-            frame, label, (x1, y1 - 10),
-            cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2
-        )
-    except Exception as e:
-        logger.error(f"[] Error drawing box and label: {e}")
-        logger.debug(traceback.format_exc())
-
-def draw_trace_path(frame, trail, color, logger):
-    try:
-        logger.debug(f"[] Drawing trace path with color: {color}, trail length: {len(trail)}")
-        for j in range(1, len(trail)):
-            cv2.line(frame, trail[j - 1], trail[j], color, 2)
-    except Exception as e:
-        logger.error(f"[] Error drawing trace path: {e}")
-        logger.debug(traceback.format_exc())
-
-def draw_direction_arrow(frame, dir_trail, direction, logger):
-    try:
-        logger.debug(f"[] Drawing direction arrow for direction: {direction}, trail length: {len(dir_trail)}")
-        if len(dir_trail) >= 2:
-            x1_arrow, y1_arrow = dir_trail[0]
-            x2_arrow, y2_arrow = dir_trail[-1]
-            arrow_color = DIRECTION_COLOR_MAP[direction]
-            cv2.arrowedLine(
-            frame,
-            (x1_arrow, y1_arrow),
-            (x2_arrow, y2_arrow),
-            arrow_color,
-            2,
-            tipLength=0.4
-        )
-    except Exception as e:
-        logger.error(f"[] Error drawing direction arrow: {e}")
-        logger.debug(traceback.format_exc())
 
 def annotate_detections(frame, frame_idx, detections, trail_coords, direction_coords, object_logs, fps, logger):
     try:

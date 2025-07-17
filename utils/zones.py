@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 
+
 ZONE_COLORS = {
     "A": (255, 0, 0),    # Blue
     "B": (0, 255, 0),    # Green
@@ -8,6 +9,7 @@ ZONE_COLORS = {
     "D": (0, 255, 255),   # Yellow
     'E': (175, 140, 200)    # Purplish-Gray
 }
+
 
 def define_zones(frame_width, frame_height, pad_percent=0.10, b_pad_percent=0.15, t_pad_percent=0.20):
     left_w = int(pad_percent * frame_width)
