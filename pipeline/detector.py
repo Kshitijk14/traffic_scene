@@ -1,19 +1,13 @@
 import os
 from pathlib import Path
 from utils.config import CONFIG
-from utils.logger import setup_logger
 from ultralytics import YOLO
 import supervision as sv
 
-# configurations
-LOG_PATH = Path(CONFIG["LOG_DIR"])
-MODEL_WEIGHTS = Path(CONFIG["MODELS_WEIGHTS_8X"])
-MODEL_CONFIG = Path(CONFIG["MODELS_CONFIG_8X"])
 
-# setup logging
-LOG_DIR = os.path.join(os.getcwd(), LOG_PATH)
-os.makedirs(LOG_DIR, exist_ok=True)  # Create the logs directory if it doesn't exist
-LOG_FILE = os.path.join(LOG_DIR, "detector.log")
+# configurations
+MODEL_WEIGHTS = Path(CONFIG["MODELS_WEIGHTS_8N"])
+MODEL_CONFIG = Path(CONFIG["MODELS_CONFIG_8N"])
 
 
 class VehicleDetector:
