@@ -14,18 +14,33 @@ DIRECTION_COLOR_MAP = {
 }
 
 
-def estimate_speed(trail, fps, logger):
+def estimate_speed(trail, fps, logger, pixels_to_meters=0.05):
     try:
-        logger.debug(f"[] Estimating speed for trail: {trail}")
-        
-        y_start, y_end = trail[0][1], trail[-1][1]
-        distance = abs(y_end - y_start)
+        if len(trail) < 2:
+            return 0
+
+        x1, y1 = trail[0]
+        x2, y2 = trail[-1]
+        dx = x2 - x1
+        dy = y2 - y1
+        distance_px = math.sqrt(dx**2 + dy**2)
+        distance_m = distance_px * pixels_to_meters
         time_sec = len(trail) / fps
-        return int((distance / time_sec) * 3.6)
+
+        if time_sec <= 0:
+            logger.warning("[] Invalid time duration for speed estimation.")
+            return 0
+
+        speed_kmph = (distance_m / time_sec) * 3.6
+
+        if speed_kmph > 150:
+            logger.warning(f"[] Unusually high speed detected: {speed_kmph:.2f} km/h")
+
+        return int(speed_kmph)
     except Exception as e:
         logger.error(f"[] Error estimating speed: {e}")
         logger.debug(traceback.format_exc())
-        return 
+        return 0
 
 def estimate_cardinal_direction(dir_trail, logger, threshold=10):
     try:

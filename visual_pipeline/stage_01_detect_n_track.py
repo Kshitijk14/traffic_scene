@@ -54,15 +54,17 @@ def annotate_detections(frame, frame_idx, detections, trail_coords, direction_co
             else:
                 speed_kmph = estimate_speed(trail, fps, logger)
                 direction = estimate_cardinal_direction(dir_trail, logger)
-                label = f"#{track_id} {speed_kmph} km/h {direction}"
+                confidence = (float(detections.confidence[i]) * 100)
+                label = (f"#{track_id}, {speed_kmph} km/h, {direction}, {confidence:.1f}%")
                 draw_direction_arrow(annotated_frame, dir_trail, direction, logger)
-                logger.debug(f"[] Track ID: {track_id}, Speed: {speed_kmph} km/h, Direction: {direction}")
+                logger.debug(f"[] Track ID: {track_id}, Speed: {speed_kmph} km/h, Direction: {direction}, Confidence: {confidence:.1f}%")
                 
                 # Track object for logging
                 if track_id not in object_logs:
                     object_logs[track_id] = {
                         "class_id": class_id,
                         "speeds": [],
+                        "confidences": [],
                         "entry_dir": direction,
                         "exit_dir": direction,
                         "entry_time": frame_idx / fps,
@@ -72,6 +74,7 @@ def annotate_detections(frame, frame_idx, detections, trail_coords, direction_co
                     object_logs[track_id]["exit_time"] = frame_idx / fps
                 
                 object_logs[track_id]["speeds"].append(speed_kmph)
+                object_logs[track_id]["confidences"].append(confidence)
                 object_logs[track_id]["exit_dir"] = direction
 
             draw_box_and_label(annotated_frame, (x1, y1, x2, y2), label, color, logger)
@@ -114,7 +117,7 @@ def run_stage_01(video_path=SOURCE_VIDEO_PATH, output_path=TARGET_VIDEO_PATH):
         trail_coords = defaultdict(deque)
         direction_coords = defaultdict(deque)
 
-        CSV_OUT_FILE = os.path.join(TRACK_CHECKPOINTS_PATH, (f"05-object_log_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"))
+        CSV_OUT_FILE = os.path.join(TRACK_CHECKPOINTS_PATH, (f"06-object_log_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"))
         object_logs = dict()
         active_track_ids = set()
 
@@ -142,6 +145,12 @@ def run_stage_01(video_path=SOURCE_VIDEO_PATH, output_path=TARGET_VIDEO_PATH):
                         log = object_logs[exited_id]
                         if log["speeds"]:
                             avg_speed = sum(log["speeds"]) / len(log["speeds"])
+                            
+                            avg_confidence = (
+                                round(sum(log["confidences"]) / len(log["confidences"]), 2)
+                                if log["confidences"] else 0.0
+                            )
+                            
                             save_object_log_csv(
                                 CSV_OUT_FILE,
                                 TRACK_CHECKPOINTS_CLASS,
@@ -149,6 +158,7 @@ def run_stage_01(video_path=SOURCE_VIDEO_PATH, output_path=TARGET_VIDEO_PATH):
                                     "obj_tracker_id": exited_id,
                                     "class_id": log["class_id"],
                                     "avg_speed_kmph": round(avg_speed, 2),
+                                    "avg_confidence": avg_confidence,
                                     "entry_direction": log["entry_dir"],
                                     "exit_direction": log["exit_dir"],
                                     "entry_time": str(timedelta(seconds=log["entry_time"])),
