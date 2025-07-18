@@ -6,13 +6,13 @@ from utils.logger import setup_logger
 import supervision as sv
 from datetime import datetime, timedelta
 from collections import defaultdict, deque
-from utils.detector import VehicleDetector, draw_box_and_label
-from utils.tracker import Tracker, draw_trace_path
-from utils.estimator import estimate_speed, estimate_cardinal_direction, draw_direction_arrow
-from utils.zones import define_zones, draw_zones
-from utils.zones_utils import get_zone_for_point
+from utils.visual.detector import VehicleDetector, draw_box_and_label
+from utils.visual.tracker import Tracker, draw_trace_path
+from utils.visual.estimator import estimate_speed, estimate_cardinal_direction, draw_direction_arrow
+from utils.visual.zones import define_zones, draw_zones
+# from utils.visual.zones_utils import get_zone_for_point
 from utils.common import ensure_directory_exists
-from utils.save_track_checkpoints import save_object_log_csv
+from utils.visual.save_track_checkpoints import save_object_log_csv
 
 
 # configurations
@@ -21,6 +21,7 @@ SOURCE_VIDEO_PATH = Path(CONFIG["SOURCE_VIDEO_PATH"])
 TARGET_VIDEO_PATH = Path(CONFIG["TARGET_VIDEO_PATH"])
 TRACK_CHECKPOINTS_PATH = Path(CONFIG["TRACK_CHECKPOINTS_DIR"])
 TRACK_CHECKPOINTS_CLASS = CONFIG["TRACK_CHECKPOINTS_CLASS"]
+CONF_THRESHOLD = CONFIG["CONF_THRESHOLD"]
 
 # setup logging
 LOG_DIR = os.path.join(os.getcwd(), LOG_PATH)
@@ -78,6 +79,7 @@ def annotate_detections(frame, frame_idx, detections, trail_coords, direction_co
                 object_logs[track_id]["speeds"].append(speed_kmph)
                 object_logs[track_id]["confidences"].append(confidence)
                 object_logs[track_id]["exit_dir"] = direction
+                object_logs[track_id]["last_crop"] = frame[y1:y2, x1:x2]
 
             draw_box_and_label(annotated_frame, (x1, y1, x2, y2), label, color, logger)
             draw_trace_path(annotated_frame, trail, color, logger)
@@ -97,9 +99,9 @@ def run_stage_01(video_path=SOURCE_VIDEO_PATH, output_path=TARGET_VIDEO_PATH):
 
     try:
         cap = cv2.VideoCapture(video_path)
-        width  = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        fps    = cap.get(cv2.CAP_PROP_FPS)
+        fps = cap.get(cv2.CAP_PROP_FPS)
         frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
         ensure_directory_exists(output_path)
@@ -119,7 +121,7 @@ def run_stage_01(video_path=SOURCE_VIDEO_PATH, output_path=TARGET_VIDEO_PATH):
         trail_coords = defaultdict(deque)
         direction_coords = defaultdict(deque)
 
-        CSV_OUT_FILE = os.path.join(TRACK_CHECKPOINTS_PATH, (f"07-object_log_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"))
+        CSV_OUT_FILE = os.path.join(TRACK_CHECKPOINTS_PATH, (f"09-object_log_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"))
         object_logs = dict()
         active_track_ids = set()
 

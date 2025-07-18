@@ -3,7 +3,7 @@ LOG_DIR: "logs"
 SOURCE_DIR: "data/india/"
 SOURCE_VIDEO_PATH: "data/india/08_30fps.mp4"
 RESULT_DIR: "results/india/"
-TARGET_VIDEO_PATH: "results/india/result_013-08_30fps.mp4"
+TARGET_VIDEO_PATH: "results/india/result_015-08_30fps.mp4"
 
 TRACK_CHECKPOINTS_DIR: "results/csv/"
 TRACK_CHECKPOINTS_CLASS: [
@@ -12,6 +12,8 @@ TRACK_CHECKPOINTS_CLASS: [
   "entry_direction", "exit_direction",
   "entry_time", "exit_time"
 ]
+
+CONF_THRESHOLD: 0.6
 
 MODELS_DIR: "models/"
 MODELS_WEIGHTS_8X: "models/yolov8x.pt"

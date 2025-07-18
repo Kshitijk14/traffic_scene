@@ -6,8 +6,8 @@ from ultralytics import YOLO
 
 
 # configurations
-MODEL_WEIGHTS = Path(CONFIG["MODELS_WEIGHTS_8N"])
-MODEL_CONFIG = Path(CONFIG["MODELS_CONFIG_8N"])
+MODEL_WEIGHTS = Path(CONFIG["MODELS_WEIGHTS_8X"])
+MODEL_CONFIG = Path(CONFIG["MODELS_CONFIG_8X"])
 
 
 class VehicleDetector:
