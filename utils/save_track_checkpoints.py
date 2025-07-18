@@ -6,7 +6,7 @@ def save_object_log_csv(csv_path, fieldnames, data_row):
     Path(csv_path).parent.mkdir(parents=True, exist_ok=True)
     file_exists = Path(csv_path).is_file()
 
-    with open(csv_path, mode="a", newline="") as f:
+    with open(csv_path, mode="a", encoding="utf-8", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         if not file_exists:
             writer.writeheader()

@@ -10,6 +10,8 @@ from utils.detector import VehicleDetector, draw_box_and_label
 from utils.tracker import Tracker, draw_trace_path
 from utils.estimator import estimate_speed, estimate_cardinal_direction, draw_direction_arrow
 from utils.zones import define_zones, draw_zones
+from utils.zones_utils import get_zone_for_point
+from utils.direction_estimator import get_final_direction
 from utils.common import ensure_directory_exists
 from utils.save_track_checkpoints import save_object_log_csv
 
@@ -35,7 +37,7 @@ CLASS_COLOR_MAP = {
 }
 
 
-def annotate_detections(frame, frame_idx, detections, trail_coords, direction_coords, object_logs, fps, logger):
+def annotate_detections(frame, frame_idx, detections, trail_coords, direction_coords, object_logs, fps, zones, logger):
     try:
         annotated_frame = frame.copy()
         logger.debug(f"[] Annotating frame {frame_idx} with {len(detections.xyxy)} detections.")
@@ -53,11 +55,23 @@ def annotate_detections(frame, frame_idx, detections, trail_coords, direction_co
                 label = f"#{track_id}"
             else:
                 speed_kmph = estimate_speed(trail, fps, logger)
+                
+                
                 direction = estimate_cardinal_direction(dir_trail, logger)
+                
+                entry_zone = object_logs[track_id]["entry_zone"]
+                exit_zone = object_logs[track_id]["exit_zone"]
+                zone_direction = get_final_direction(entry_zone, exit_zone)
+                
                 confidence = (float(detections.confidence[i]) * 100)
+                
                 label = (f"#{track_id}, {speed_kmph} km/h, {direction}, {confidence:.1f}%")
                 draw_direction_arrow(annotated_frame, dir_trail, direction, logger)
                 logger.debug(f"[] Track ID: {track_id}, Speed: {speed_kmph} km/h, Direction: {direction}, Confidence: {confidence:.1f}%")
+                
+                x = int((x1 + x2) / 2)
+                y = int(y2)
+                zone_name = get_zone_for_point(x, y, zones)
                 
                 # Track object for logging
                 if track_id not in object_logs:
@@ -67,11 +81,15 @@ def annotate_detections(frame, frame_idx, detections, trail_coords, direction_co
                         "confidences": [],
                         "entry_dir": direction,
                         "exit_dir": direction,
+                        "entry_zone": zone_name,
+                        "exit_zone": zone_name,
                         "entry_time": frame_idx / fps,
                         "exit_time": frame_idx / fps
                     }
                 else:
                     object_logs[track_id]["exit_time"] = frame_idx / fps
+                    if zone_name:
+                        object_logs[track_id]["exit_zone"] = zone_name
                 
                 object_logs[track_id]["speeds"].append(speed_kmph)
                 object_logs[track_id]["confidences"].append(confidence)
@@ -144,7 +162,14 @@ def run_stage_01(video_path=SOURCE_VIDEO_PATH, output_path=TARGET_VIDEO_PATH):
                     if exited_id in object_logs:
                         log = object_logs[exited_id]
                         if log["speeds"]:
-                            avg_speed = sum(log["speeds"]) / len(log["speeds"])
+                            entry_zone = log.get("entry_zone")
+                            exit_zone = log.get("exit_zone")
+                            final_direction = get_final_direction(entry_zone, exit_zone)
+                            
+                            avg_speed = (
+                                round(sum(log["speeds"]) / len(log["speeds"]), 2)
+                                if log["speeds"] else 0.0
+                            )
                             
                             avg_confidence = (
                                 round(sum(log["confidences"]) / len(log["confidences"]), 2)
@@ -157,10 +182,13 @@ def run_stage_01(video_path=SOURCE_VIDEO_PATH, output_path=TARGET_VIDEO_PATH):
                                 {
                                     "obj_tracker_id": exited_id,
                                     "class_id": log["class_id"],
-                                    "avg_speed_kmph": round(avg_speed, 2),
+                                    "avg_speed_kmph": avg_speed,
                                     "avg_confidence": avg_confidence,
                                     "entry_direction": log["entry_dir"],
                                     "exit_direction": log["exit_dir"],
+                                    "entry_zone": entry_zone,
+                                    "exit_zone": exit_zone,
+                                    "final_direction": final_direction,
                                     "entry_time": str(timedelta(seconds=log["entry_time"])),
                                     "exit_time": str(timedelta(seconds=log["exit_time"]))
                                 }
@@ -179,7 +207,7 @@ def run_stage_01(video_path=SOURCE_VIDEO_PATH, output_path=TARGET_VIDEO_PATH):
                     direction_coords[int(track_id)].append((int(x), int(y)))
 
                 annotated_frame = annotate_detections(
-                    frame, frame_idx, tracked_detections, trail_coords, direction_coords, object_logs, fps, logger
+                    frame, frame_idx, tracked_detections, trail_coords, direction_coords, object_logs, fps, zones, logger
                 )
                 logger.debug(f"Frame {frame_idx}: Annotated frame with {len(tracked_detections.xyxy)} detections.")
                 
