@@ -3,14 +3,13 @@ LOG_DIR: "logs"
 SOURCE_DIR: "data/india/"
 SOURCE_VIDEO_PATH: "data/india/08_30fps.mp4"
 RESULT_DIR: "results/india/"
-TARGET_VIDEO_PATH: "results/india/result_012-08_30fps.mp4"
+TARGET_VIDEO_PATH: "results/india/result_013-08_30fps.mp4"
 
 TRACK_CHECKPOINTS_DIR: "results/csv/"
 TRACK_CHECKPOINTS_CLASS: [
   "obj_tracker_id", "class_id", 
   "avg_speed_kmph", "avg_confidence", 
   "entry_direction", "exit_direction",
-  "entry_zone", "exit_zone", "final_direction", 
   "entry_time", "exit_time"
 ]
 
