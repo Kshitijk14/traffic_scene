@@ -11,7 +11,7 @@ ZONE_COLORS = {
 }
 
 
-def define_zones(frame_width, frame_height, pad_percent=0.05, b_pad_percent=0.10, t_pad_percent=0.30):
+def define_zones(frame_width, frame_height, pad_percent=0.05, b_pad_percent=0.10, t_pad_percent=0.20):
     left_w = int(pad_percent * frame_width)
     right_w = int(pad_percent * frame_width)
     bottom_h = int(b_pad_percent * frame_height)

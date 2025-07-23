@@ -6,11 +6,10 @@ from utils.logger import setup_logger
 import supervision as sv
 from datetime import datetime, timedelta
 from collections import defaultdict, deque
-from utils.visual.detector import VehicleDetector, draw_box_and_label
+from utils.visual.detector import VehicleDetector, SAHIVehicleDetector, draw_box_and_label
 from utils.visual.tracker import Tracker, draw_trace_path
 from utils.visual.estimator import estimate_speed, estimate_cardinal_direction, draw_direction_arrow
 from utils.visual.zones import define_zones, draw_zones
-# from utils.visual.zones_utils import get_zone_for_point
 from utils.common import ensure_directory_exists
 from utils.visual.save_track_checkpoints import save_object_log_csv
 
@@ -37,7 +36,7 @@ CLASS_COLOR_MAP = {
 }
 
 
-def annotate_detections(frame, frame_idx, detections, trail_coords, direction_coords, object_logs, fps, zones, logger):
+def annotate_detections(frame, frame_idx, detections, trail_coords, direction_coords, object_logs, fps, logger):
     try:
         annotated_frame = frame.copy()
         logger.debug(f"[] Annotating frame {frame_idx} with {len(detections.xyxy)} detections.")
@@ -114,14 +113,15 @@ def run_stage_01(video_path=SOURCE_VIDEO_PATH, output_path=TARGET_VIDEO_PATH):
         )
         logger.info(f"Video opened: {video_path}, FPS: {fps}, Frame Count: {frame_count}")
 
-        detector = VehicleDetector()
+        # detector = VehicleDetector()
+        detector = SAHIVehicleDetector()
         tracker = Tracker()
         
         # trail_coords = defaultdict(lambda: deque(maxlen=int(fps * 5)))
         trail_coords = defaultdict(deque)
         direction_coords = defaultdict(deque)
 
-        CSV_OUT_FILE = os.path.join(TRACK_CHECKPOINTS_PATH, (f"09-object_log_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"))
+        CSV_OUT_FILE = os.path.join(TRACK_CHECKPOINTS_PATH, (f"01-object_log_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"))
         object_logs = dict()
         active_track_ids = set()
 
@@ -186,7 +186,7 @@ def run_stage_01(video_path=SOURCE_VIDEO_PATH, output_path=TARGET_VIDEO_PATH):
                     direction_coords[int(track_id)].append((int(x), int(y)))
 
                 annotated_frame = annotate_detections(
-                    frame, frame_idx, tracked_detections, trail_coords, direction_coords, object_logs, fps, zones, logger
+                    frame, frame_idx, tracked_detections, trail_coords, direction_coords, object_logs, fps, logger
                 )
                 logger.debug(f"Frame {frame_idx}: Annotated frame with {len(tracked_detections.xyxy)} detections.")
                 

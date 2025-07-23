@@ -2,6 +2,7 @@ inference
 supervision
 tqdm
 ultralytics
+sahi
 opencv-python
 onnxruntime
 pytest

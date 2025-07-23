@@ -2,10 +2,10 @@ LOG_DIR: "logs"
 
 SOURCE_DIR: "data/india/"
 SOURCE_VIDEO_PATH: "data/india/08_30fps.mp4"
-RESULT_DIR: "results/india/"
-TARGET_VIDEO_PATH: "results/india/result_015-08_30fps.mp4"
+RESULT_DIR: "results/sahi/"
+TARGET_VIDEO_PATH: "results/sahi/result_01-08_30fps.mp4"
 
-TRACK_CHECKPOINTS_DIR: "results/csv/"
+TRACK_CHECKPOINTS_DIR: "results/sahi/"
 TRACK_CHECKPOINTS_CLASS: [
   "obj_tracker_id", "class_id", 
   "avg_speed_kmph", "avg_confidence", 
@@ -18,5 +18,7 @@ CONF_THRESHOLD: 0.6
 MODELS_DIR: "models/"
 MODELS_WEIGHTS_8X: "models/yolov8x.pt"
 MODELS_CONFIG_8X: "models/yolov8x.yaml"
+MODELS_WEIGHTS_8M: "models/yolov8m.pt"
+MODELS_CONFIG_8M: "models/yolov8m.yaml"
 MODELS_WEIGHTS_8N: "models/yolov8n.pt"
 MODELS_CONFIG_8N: "models/yolov8n.yaml"
