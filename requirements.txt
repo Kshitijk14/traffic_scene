@@ -16,6 +16,7 @@ scikit-learn
 torch
 matplotlib
 seaborn
+wandb
 
 docopt
 antlr4-python3-runtime

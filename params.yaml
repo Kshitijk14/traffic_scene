@@ -1,9 +1,9 @@
 LOG_DIR: "logs"
 
-SOURCE_DIR: "data/india/"
-SOURCE_VIDEO_PATH: "data/india/08_30fps.mp4"
+SOURCE_DIR: "ex_data/india/"
+SOURCE_VIDEO_PATH: "ex_data/india/08_30fps.mp4"
 RESULT_DIR: "results/sahi/"
-TARGET_VIDEO_PATH: "results/sahi/result_01-08_30fps.mp4"
+TARGET_VIDEO_PATH: "results/sahi/result_02-08_30fps.mp4"
 
 TRACK_CHECKPOINTS_DIR: "results/sahi/"
 TRACK_CHECKPOINTS_CLASS: [

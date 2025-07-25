@@ -113,8 +113,8 @@ def run_stage_01(video_path=SOURCE_VIDEO_PATH, output_path=TARGET_VIDEO_PATH):
         )
         logger.info(f"Video opened: {video_path}, FPS: {fps}, Frame Count: {frame_count}")
 
-        # detector = VehicleDetector()
-        detector = SAHIVehicleDetector()
+        detector = VehicleDetector()
+        # detector = SAHIVehicleDetector()
         tracker = Tracker()
         
         # trail_coords = defaultdict(lambda: deque(maxlen=int(fps * 5)))
