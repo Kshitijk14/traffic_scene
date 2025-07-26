@@ -183,8 +183,8 @@ cython_debug/
 .cursorindexingignore
 
 data/
-ex_data/
 dataset/
 results/
 models/
+runs/
 CLI_LOCAL.md
