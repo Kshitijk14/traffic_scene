@@ -16,8 +16,9 @@ scikit-learn
 torch
 matplotlib
 seaborn
-wandb
+paddleocr
+paddlepaddle
 
-docopt
-antlr4-python3-runtime
-iopath
+# docopt
+# antlr4-python3-runtime
+# iopath
