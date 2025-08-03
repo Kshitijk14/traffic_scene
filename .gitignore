@@ -135,6 +135,7 @@ env/
 venv/
 ENV/
 envi/
+environment/
 env.bak/
 venv.bak/
 
@@ -186,5 +187,6 @@ data/
 dataset/
 results/
 models/
+configs/
 runs/
 CLI_LOCAL.md

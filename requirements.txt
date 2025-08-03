@@ -1,24 +1,20 @@
-inference
-supervision
-tqdm
+# inference
+# supervision
+# tqdm
 ultralytics
-sahi
+# sahi
 opencv-python
-onnxruntime
+# onnxruntime
 pytest
 pyyaml
 psutil
-python-dotenv
-requests
+# python-dotenv
+# requests
 numpy
 pandas
 scikit-learn
-torch
 matplotlib
 seaborn
+torch
 paddleocr
 paddlepaddle
-
-# docopt
-# antlr4-python3-runtime
-# iopath
